@@ -59,7 +59,6 @@ class LocationTabview extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 16),
-
               LayoutBuilder(
                 builder: (context, constraints) {
                   if (constraints.maxWidth > 600) {
@@ -96,9 +95,7 @@ class LocationTabview extends StatelessWidget {
                                 context,
                                 'Start Location Update',
                                 isTracking ? Colors.grey : Colors.green,
-                                (isLoading || isTracking)
-                                    ? null
-                                    : () => context.read<LocationBloc>().add(StartLocationUpdates()),
+                                (isLoading || isTracking) ? null : () => _showConfirmationDialog(context),
                                 isLoading,
                               ),
                             ),
@@ -141,9 +138,7 @@ class LocationTabview extends StatelessWidget {
                           context,
                           'Start Location Update',
                           isTracking ? Colors.grey : Colors.green,
-                          (isLoading || isTracking)
-                              ? null
-                              : () => context.read<LocationBloc>().add(StartLocationUpdates()),
+                          (isLoading || isTracking) ? null : () => _showConfirmationDialog(context),
                           isLoading,
                         ),
                         const SizedBox(height: 12),
@@ -166,6 +161,33 @@ class LocationTabview extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _showConfirmationDialog(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Start Location Updates'),
+        content: const Text('Do you want to start location updates every 30 seconds?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('NO')),
+          TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('YES')),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      context.read<LocationBloc>().add(StartLocationUpdates());
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Location update started'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   Future<void> _requestNotificationPermission(BuildContext context) async {
@@ -313,11 +335,11 @@ class LocationTabview extends StatelessWidget {
   Widget _buildRequestCard(LocationRequest request) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4))],
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -328,39 +350,33 @@ class LocationTabview extends StatelessWidget {
               Expanded(
                 child: Text(
                   request.name,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               const SizedBox(width: 8),
-              Text(request.timestamp, style: TextStyle(fontSize: 12, color: Colors.grey[500])),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Row(
             children: [
               Expanded(
                 child: Text(
-                  'Lat: ${request.latitude.toStringAsFixed(6)}',
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                  'Lat: ${request.latitude.toStringAsFixed(4)}',
+                  style: TextStyle(fontSize: 12.5, color: Colors.grey[700]),
                 ),
               ),
               Expanded(
                 child: Text(
-                  'Lng: ${request.longitude.toStringAsFixed(6)}',
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                  'Lng: ${request.longitude.toStringAsFixed(4)}',
+                  style: TextStyle(fontSize: 12.5, color: Colors.grey[700]),
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
               Expanded(
-                child: Text('Speed: ${request.speed}', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
-              ),
-              Expanded(
-                child: Text('Accuracy: ${request.accuracy}', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+                child: Text(
+                  'Speed: ${request.speed.toString()}',
+                  style: TextStyle(fontSize: 12.5, color: Colors.grey[700]),
+                ),
               ),
             ],
           ),

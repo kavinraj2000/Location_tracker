@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:locationtracker/Homepage/bloc/locationbloc.dart';
 import 'package:locationtracker/Homepage/model/location_request_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LocationMobileview extends StatelessWidget {
   const LocationMobileview({super.key});
@@ -78,7 +80,7 @@ class LocationMobileview extends StatelessWidget {
                 context,
                 'Start Location Update',
                 isTracking ? Colors.grey : Colors.green,
-                (isLoading || isTracking) ? null : () => context.read<LocationBloc>().add(StartLocationUpdates()),
+                (isLoading || isTracking) ? null : () => _showConfirmationDialog(context),
                 isLoading,
               ),
               SizedBox(height: 12),
@@ -95,6 +97,33 @@ class LocationMobileview extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _showConfirmationDialog(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Confirm'),
+        content: Text('Do you want to start location updates?'),
+        actions: [
+          TextButton(child: Text('NO'), onPressed: () => Navigator.pop(context, false)),
+          TextButton(child: Text('YES'), onPressed: () => Navigator.pop(context, true)),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      context.read<LocationBloc>().add(StartLocationUpdates());
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Location update started'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   Future<void> _requestNotificationPermission(BuildContext context) async {
@@ -136,7 +165,7 @@ class LocationMobileview extends StatelessWidget {
       } else if (result.isPermanentlyDenied) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Notification permission permanently denied. Please enable it in settings.'),
+            content: Text('Permission permanently denied. Enable from settings.'),
             backgroundColor: Colors.red,
             duration: Duration(seconds: 4),
             behavior: SnackBarBehavior.floating,
@@ -147,7 +176,7 @@ class LocationMobileview extends StatelessWidget {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error requesting notification permission: $e'),
+          content: Text('Error requesting permission: $e'),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 3),
           behavior: SnackBarBehavior.floating,
@@ -208,7 +237,9 @@ class LocationMobileview extends StatelessWidget {
                   padding: EdgeInsets.all(16.0),
                   itemCount: state.requests.length,
                   itemBuilder: (context, index) {
-                    return _buildRequestCard(state.requests[index]);
+                    final request = state.requests[index];
+                    _saveToPrefs(request);
+                    return _buildRequestCard(request);
                   },
                 ),
         );
@@ -216,14 +247,22 @@ class LocationMobileview extends StatelessWidget {
     );
   }
 
+  Future<void> _saveToPrefs(LocationRequest request) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString( 
+      'last_location',
+      '${request.latitude},${request.longitude},${request.speed},${request.timestamp}',
+    );
+  }
+
   Widget _buildRequestCard(LocationRequest request) {
     return Container(
-      margin: EdgeInsets.only(bottom: 8),
-      padding: EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
+        borderRadius: BorderRadius.circular(6),
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,38 +270,36 @@ class LocationMobileview extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                request.name,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+              Expanded(
+                child: Text(
+                  request.name,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-              Text(request.timestamp, style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+              const SizedBox(width: 8),
             ],
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 6),
           Row(
             children: [
               Expanded(
                 child: Text(
-                  'Lat: ${request.latitude.toStringAsFixed(6)}',
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                  'Lat: ${request.latitude?.toStringAsFixed(5) ?? "N/A"}',
+                  style: TextStyle(fontSize: 12.5, color: Colors.grey[700]),
                 ),
               ),
               Expanded(
                 child: Text(
-                  'Lng: ${request.longitude.toStringAsFixed(6)}',
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                  'Lng: ${request.longitude?.toStringAsFixed(5) ?? "N/A"}',
+                  style: TextStyle(fontSize: 12.5, color: Colors.grey[700]),
                 ),
               ),
-            ],
-          ),
-          SizedBox(height: 4),
-          Row(
-            children: [
               Expanded(
-                child: Text('Speed: ${request.speed}', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
-              ),
-              Expanded(
-                child: Text('Accuracy: ${request.accuracy}', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+                child: Text(
+                  'Speed: ${request.speed?.toString() ?? "N/A"}',
+                  style: TextStyle(fontSize: 12.5, color: Colors.grey[700]),
+                ),
               ),
             ],
           ),

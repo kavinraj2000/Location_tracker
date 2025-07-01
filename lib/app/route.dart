@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:locationtracker/Homepage/Location_tracker.dart';
+import 'package:locationtracker/Homepage/view/location.dart';
 import 'package:locationtracker/app/route_name.dart';
 
 class Routes {

@@ -71,7 +71,6 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
         return;
       }
 
-      // Check permissions
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
         emit(
@@ -83,15 +82,13 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
         return;
       }
 
-      // Get current position
       Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
 
       final newRequest = LocationRequest(
         name: 'Current Location',
         latitude: position.latitude,
         longitude: position.longitude,
-        speed: position.speed != null ? '${(position.speed! * 3.6).toStringAsFixed(1)} km/h' : 'N/A',
-        accuracy: '${position.accuracy.toStringAsFixed(1)}m',
+        speed: position.speed != null ? '${(position.speed * 3.6).toStringAsFixed(1)} m' : 'N/A',
         timestamp: DateTime.now().toString().substring(11, 19),
       );
 
@@ -115,7 +112,6 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
     emit(state.copyWith(status: LocationStatus.loading));
 
     try {
-      // Check if location services are enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         emit(
@@ -127,7 +123,6 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
         return;
       }
 
-      // Check permissions
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
         emit(
@@ -139,20 +134,12 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
         return;
       }
 
-      const LocationSettings locationSettings = LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 10, // Update when moved 10 meters
-      );
+      const LocationSettings locationSettings = LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 10);
 
       _positionStreamSubscription = Geolocator.getPositionStream(locationSettings: locationSettings).listen(
         (Position position) {
           add(
-            LocationUpdated(
-              latitude: position.latitude,
-              longitude: position.longitude,
-              speed: position.speed,
-              accuracy: position.accuracy,
-            ),
+            LocationUpdated(latitude: position.latitude, longitude: position.longitude, speed: position.speed.toInt()),
           );
         },
         onError: (error) {
@@ -191,12 +178,15 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
   }
 
   Future<void> _onLocationUpdated(LocationUpdated event, Emitter<LocationState> emit) async {
+    int requestCounter = 0;
+
+    requestCounter++;
+
     final newRequest = LocationRequest(
-      name: 'Live Update',
+      name: 'Request $requestCounter',
       latitude: event.latitude,
       longitude: event.longitude,
-      speed: event.speed != null ? '${(event.speed! * 3.6).toStringAsFixed(1)} km/h' : 'N/A',
-      accuracy: '${event.accuracy.toStringAsFixed(1)}m',
+      speed: event.speed != null ? '${(event.speed! * 3).toStringAsFixed(1)} m' : 'N/A',
       timestamp: DateTime.now().toString().substring(11, 19),
     );
 

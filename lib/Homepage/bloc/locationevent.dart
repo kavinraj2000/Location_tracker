@@ -20,11 +20,10 @@ class ClearAllLocations extends LocationEvent {}
 class LocationUpdated extends LocationEvent {
   final double latitude;
   final double longitude;
-  final double? speed;
-  final double accuracy;
+  final int? speed;
 
-  const LocationUpdated({required this.latitude, required this.longitude, this.speed, required this.accuracy});
+  const LocationUpdated({required this.latitude, required this.longitude, this.speed});
 
   @override
-  List<Object> get props => [latitude, longitude, speed ?? 0, accuracy];
+  List<Object> get props => [latitude, longitude, speed ?? 0];
 }
