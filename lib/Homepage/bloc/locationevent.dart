@@ -1,4 +1,4 @@
-part of 'location_tracker_bloc.dart';
+part of 'locationbloc.dart';
 
 abstract class LocationEvent extends Equatable {
   const LocationEvent();

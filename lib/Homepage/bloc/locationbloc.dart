@@ -4,8 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:locationtracker/Homepage/model/location_request_model.dart';
 
-part 'location_tracker_event.dart';
-part 'location_tracker_state.dart';
+part 'locationevent.dart';
+part 'locationstate.dart';
 
 class LocationBloc extends Bloc<LocationEvent, LocationState> {
   StreamSubscription<Position>? _positionStreamSubscription;

@@ -14,24 +14,6 @@ class Routes {
           return Location();
         },
       ),
-      // GoRoute(
-      //   name: RouteNames.workoutList,
-      //   path: '/workout_list',
-      //   builder: (BuildContext context, GoRouterState state) {
-      //     final Map<String, dynamic>? data = state.extra as Map<String, dynamic>?;
-      //     RouteHistory.push({'/workout_list': data});
-      //     return WorkoutListPage(data: data ?? {});
-      //   },
-      // ),
-      // GoRoute(
-      //   name: RouteNames.workoutDetail,
-      //   path: '/workout_detail',
-      //   builder: (BuildContext context, GoRouterState state) {
-      //     final Map<String, dynamic>? data = state.extra as Map<String, dynamic>?;
-      //     RouteHistory.push({'/workout_detail': data});
-      //     return WorkoutDetailPage(data: data ?? {});
-      //   },
-      // ),
     ],
     redirect: (BuildContext context, GoRouterState state) {
       return state.matchedLocation;

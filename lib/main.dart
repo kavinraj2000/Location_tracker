@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:locationtracker/Homepage/bloc/location_tracker_bloc.dart';
+import 'package:locationtracker/Homepage/bloc/locationbloc.dart';
 import 'package:locationtracker/app/app.dart';
 
 void main() {

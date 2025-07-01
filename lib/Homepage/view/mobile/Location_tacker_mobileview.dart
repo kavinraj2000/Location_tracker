@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:locationtracker/Homepage/bloc/location_tracker_bloc.dart';
+import 'package:locationtracker/Homepage/bloc/locationbloc.dart';
 import 'package:locationtracker/Homepage/model/location_request_model.dart';
 
 class LocationMobileview extends StatelessWidget {
