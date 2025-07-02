@@ -249,7 +249,7 @@ class LocationMobileview extends StatelessWidget {
 
   Future<void> _saveToPrefs(LocationRequest request) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString( 
+    await prefs.setString(
       'last_location',
       '${request.latitude},${request.longitude},${request.speed},${request.timestamp}',
     );

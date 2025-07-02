@@ -36,7 +36,7 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
       }
 
       if (permission == LocationPermission.deniedForever) {
-        emit(
+        emit( 
           state.copyWith(
             status: LocationStatus.error,
             errorMessage: 'Location permission denied permanently. Please enable in settings.',
@@ -183,7 +183,7 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
     requestCounter++;
 
     final newRequest = LocationRequest(
-      name: 'Request $requestCounter',
+      name: 'Request ${requestCounter++}',
       latitude: event.latitude,
       longitude: event.longitude,
       speed: event.speed != null ? '${(event.speed! * 3).toStringAsFixed(1)} m' : 'N/A',
